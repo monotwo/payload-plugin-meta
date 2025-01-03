@@ -1,8 +1,8 @@
+import { monoMeta } from '@monotwo/payload-plugin-meta'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { monoMeta } from 'mono-meta'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 

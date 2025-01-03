@@ -1,7 +1,7 @@
 {
-  "name": "mono-meta",
-  "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "name": "@monotwo/payload-plugin-meta",
+  "version": "0.1.0",
+  "description": "A plugin for easy meta management in Payload",
   "license": "MIT",
   "type": "module",
   "exports": {

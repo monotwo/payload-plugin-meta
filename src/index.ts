@@ -67,12 +67,8 @@ export const monoMeta =
       config.admin.components.beforeDashboard = []
     }
 
-    config.admin.components.beforeDashboard.push(
-      `mono-meta/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `mono-meta/rsc#BeforeDashboardServer`,
-    )
+    config.admin.components.beforeDashboard.push(`mono-meta/client#BeforeDashboardClient`)
+    config.admin.components.beforeDashboard.push(`mono-meta/rsc#BeforeDashboardServer`)
 
     config.endpoints.push({
       handler: () => {
