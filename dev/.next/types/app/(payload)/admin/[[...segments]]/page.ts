@@ -1,4 +1,4 @@
-// File: /Users/linkus/Github/temp/mono-meta/dev/app/(payload)/admin/[[...segments]]/page.tsx
+// File: /Users/linkus/Github/monotwo/payload-plugin-meta/dev/app/(payload)/admin/[[...segments]]/page.tsx
 import * as entry from '../../../../../../app/(payload)/admin/[[...segments]]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

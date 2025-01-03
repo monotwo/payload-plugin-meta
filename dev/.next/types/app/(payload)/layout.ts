@@ -1,4 +1,4 @@
-// File: /Users/linkus/Github/temp/mono-meta/dev/app/(payload)/layout.tsx
+// File: /Users/linkus/Github/monotwo/payload-plugin-meta/dev/app/(payload)/layout.tsx
 import * as entry from '../../../../app/(payload)/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

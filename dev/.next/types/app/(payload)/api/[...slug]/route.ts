@@ -1,4 +1,4 @@
-// File: /Users/linkus/Github/temp/mono-meta/dev/app/(payload)/api/[...slug]/route.ts
+// File: /Users/linkus/Github/monotwo/payload-plugin-meta/dev/app/(payload)/api/[...slug]/route.ts
 import * as entry from '../../../../../../app/(payload)/api/[...slug]/route.js'
 import type { NextRequest } from 'next/server.js'
 
