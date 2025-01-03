@@ -1,0 +1,30 @@
+{
+  "extends": "../tsconfig.json",
+  "exclude": [],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "next.config.mjs",
+    ".next/types/**/*.ts"
+  ],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@payload-config": [
+        "./payload.config.ts"
+      ],
+      "mono-meta": [
+        "../src/index.ts"
+      ],
+      "mono-meta/client": [
+        "../src/exports/client.ts"
+      ],
+      "mono-meta/rsc": [
+        "../src/exports/rsc.ts"
+      ]
+    },
+    "noEmit": true
+  }
+}
