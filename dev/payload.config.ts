@@ -1,4 +1,6 @@
-import { monoMeta } from '@monotwo/payload-plugin-meta'
+import type { CollectionSlug } from 'payload'
+
+import { monoMeta, slugField } from '@monotwo/payload-plugin-meta'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -28,7 +30,68 @@ export default buildConfig({
   collections: [
     {
       slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'sidebarText2',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'meta-images',
       fields: [],
+      upload: {},
+    },
+    {
+      slug: 'tests',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              fields: [
+                {
+                  name: 'contentText',
+                  type: 'text',
+                },
+                {
+                  name: 'sidebarText',
+                  type: 'text',
+                  admin: {
+                    position: 'sidebar',
+                  },
+                },
+              ],
+              label: 'Content',
+            },
+            {
+              fields: [
+                {
+                  name: 'testText',
+                  type: 'text',
+                },
+              ],
+              label: 'Test tab',
+            },
+          ],
+        },
+      ],
     },
     {
       slug: 'media',
@@ -43,14 +106,32 @@ export default buildConfig({
   }),
   editor: lexicalEditor(),
   email: testEmailAdapter,
+  globals: [
+    {
+      slug: 'about-page',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        slugField({ fields: ['title'], format: '{title}-lol' }),
+      ],
+    },
+  ],
   onInit: async (payload) => {
     await seed(payload)
   },
   plugins: [
     monoMeta({
       collections: {
+        pages: true,
         posts: true,
+        tests: true,
       },
+      globals: {
+        'about-page': true,
+      },
+      metaImagesCollection: 'meta-images' as CollectionSlug,
     }),
   ],
   secret: process.env.PAYLOAD_SECRET || 'test-secret_key',

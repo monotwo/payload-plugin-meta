@@ -1,0 +1,22 @@
+.slug-field-component .label-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slug-field-component .slug-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slug-field-component .generate-button {
+  margin: 0;
+  background: none;
+  border: none;
+  color: var(--theme-elevation-400);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}

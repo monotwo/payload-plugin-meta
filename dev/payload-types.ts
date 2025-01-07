@@ -12,8 +12,10 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    pages: Page;
+    'meta-images': MetaImage;
+    tests: Test;
     media: Media;
-    'plugin-collection': PluginCollection;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -22,8 +24,10 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    'meta-images': MetaImagesSelect<false> | MetaImagesSelect<true>;
+    tests: TestsSelect<false> | TestsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'plugin-collection': PluginCollectionSelect<false> | PluginCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -32,8 +36,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'about-page': AboutPage;
+    'meta-defaults': MetaDefault;
+  };
+  globalsSelect: {
+    'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
+    'meta-defaults': MetaDefaultsSelect<false> | MetaDefaultsSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -67,7 +77,81 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  addedByPlugin?: string | null;
+  sidebarText2?: string | null;
+  title?: string | null;
+  pageMeta: {
+    /**
+     * You can override the default meta information for this page. If you don't, the default meta information will be used.
+     */
+    showCustomMeta: boolean;
+    customMeta?: {
+      title?: string | null;
+      description?: string | null;
+      image?: (string | null) | MetaImage;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meta-images".
+ */
+export interface MetaImage {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title?: string | null;
+  pageMeta: {
+    /**
+     * You can override the default meta information for this page. If you don't, the default meta information will be used.
+     */
+    showCustomMeta: boolean;
+    customMeta?: {
+      title?: string | null;
+      description?: string | null;
+      image?: (string | null) | MetaImage;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tests".
+ */
+export interface Test {
+  id: string;
+  sidebarText?: string | null;
+  contentText?: string | null;
+  testText?: string | null;
+  pageMeta: {
+    /**
+     * You can override the default meta information for this page. If you don't, the default meta information will be used.
+     */
+    showCustomMeta: boolean;
+    customMeta?: {
+      title?: string | null;
+      description?: string | null;
+      image?: (string | null) | MetaImage;
+    };
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -88,15 +172,6 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "plugin-collection".
- */
-export interface PluginCollection {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -127,12 +202,20 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
-        relationTo: 'plugin-collection';
-        value: string | PluginCollection;
+        relationTo: 'meta-images';
+        value: string | MetaImage;
+      } | null)
+    | ({
+        relationTo: 'tests';
+        value: string | Test;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -185,7 +268,81 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  addedByPlugin?: T;
+  sidebarText2?: T;
+  title?: T;
+  pageMeta?:
+    | T
+    | {
+        showCustomMeta?: T;
+        customMeta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  pageMeta?:
+    | T
+    | {
+        showCustomMeta?: T;
+        customMeta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meta-images_select".
+ */
+export interface MetaImagesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tests_select".
+ */
+export interface TestsSelect<T extends boolean = true> {
+  sidebarText?: T;
+  contentText?: T;
+  testText?: T;
+  pageMeta?:
+    | T
+    | {
+        showCustomMeta?: T;
+        customMeta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -205,15 +362,6 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "plugin-collection_select".
- */
-export interface PluginCollectionSelect<T extends boolean = true> {
-  id?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -261,6 +409,52 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page".
+ */
+export interface AboutPage {
+  id: string;
+  title?: string | null;
+  slug: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meta-defaults".
+ */
+export interface MetaDefault {
+  id: string;
+  title: string;
+  description: string;
+  image: string | MetaImage;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page_select".
+ */
+export interface AboutPageSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meta-defaults_select".
+ */
+export interface MetaDefaultsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

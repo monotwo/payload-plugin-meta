@@ -1,29 +1,46 @@
-import type { CollectionSlug, Config } from 'payload'
+import type { CollectionSlug, Config, Field, GlobalSlug } from 'payload'
+
+import { revalidateTag } from 'next/cache.js'
+
+import { createMetaFields, createMetaTab } from './fields/Meta.js'
 
 export type MonoMetaConfig = {
-  /**
-   * List of collections to add a custom field
-   */
   collections?: Partial<Record<CollectionSlug, true>>
   disabled?: boolean
+  globals?: Partial<Record<GlobalSlug, true>>
+  metaImagesCollection: CollectionSlug
 }
 
 export const monoMeta =
   (pluginOptions: MonoMetaConfig) =>
   (config: Config): Config => {
+    if (!config.globals) {
+      config.globals = []
+    }
+
     if (!config.collections) {
       config.collections = []
     }
 
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
+    if (!config.globals.find((global) => global.slug === 'meta-defaults')) {
+      config.globals.push({
+        slug: 'meta-defaults',
+        admin: {
+          group: 'Meta',
         },
-      ],
-    })
+        fields: createMetaFields({
+          metaImagesCollection: pluginOptions.metaImagesCollection,
+          required: true,
+        }),
+        hooks: {
+          afterChange: [
+            () => {
+              revalidateTag('meta-defaults')
+            },
+          ],
+        },
+      })
+    }
 
     if (pluginOptions.collections) {
       for (const collectionSlug in pluginOptions.collections) {
@@ -32,13 +49,59 @@ export const monoMeta =
         )
 
         if (collection) {
-          collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
-            admin: {
-              position: 'sidebar',
-            },
-          })
+          // If collection already has tabs, add new Meta tab
+
+          if (collection.fields.some((field) => field.type === 'tabs')) {
+            const tabsField = collection.fields.find((field) => field.type === 'tabs')
+            if (tabsField && 'tabs' in tabsField) {
+              // Extract sidebar fields from existing tabs
+              const sidebarFields: Field[] = []
+              tabsField.tabs = tabsField.tabs.map((tab) => {
+                const tabSidebarFields = tab.fields.filter(
+                  (field) => field.admin?.position === 'sidebar',
+                )
+                sidebarFields.push(...tabSidebarFields)
+
+                return {
+                  ...tab,
+                  fields: tab.fields.filter((field) => field.admin?.position !== 'sidebar'),
+                }
+              })
+
+              // Add Meta tab
+              tabsField.tabs.push(
+                createMetaTab({ metaImagesCollection: pluginOptions.metaImagesCollection }),
+              )
+
+              // Move sidebar fields outside tabs
+              collection.fields = [...sidebarFields, ...collection.fields]
+            }
+          } else {
+            // Convert existing fields to Content tab and add Meta tab
+            const existingFields = [...collection.fields]
+
+            // Separate sidebar fields from content fields
+            const sidebarFields = existingFields.filter(
+              (field) => field.admin?.position === 'sidebar',
+            )
+            const contentFields = existingFields.filter(
+              (field) => field.admin?.position !== 'sidebar',
+            )
+
+            collection.fields = [
+              ...sidebarFields,
+              {
+                type: 'tabs',
+                tabs: [
+                  {
+                    fields: contentFields,
+                    label: 'Content',
+                  },
+                  createMetaTab({ metaImagesCollection: pluginOptions.metaImagesCollection }),
+                ],
+              },
+            ]
+          }
         }
       }
     }
@@ -67,43 +130,11 @@ export const monoMeta =
       config.admin.components.beforeDashboard = []
     }
 
-    config.admin.components.beforeDashboard.push(`mono-meta/client#BeforeDashboardClient`)
-    config.admin.components.beforeDashboard.push(`mono-meta/rsc#BeforeDashboardServer`)
-
-    config.endpoints.push({
-      handler: () => {
-        return Response.json({ message: 'Hello from custom endpoint' })
-      },
-      method: 'get',
-      path: '/my-plugin-endpoint',
-    })
-
-    const incomingOnInit = config.onInit
-
-    config.onInit = async (payload) => {
-      // Ensure we are executing any existing onInit functions before running our own.
-      if (incomingOnInit) {
-        await incomingOnInit(payload)
-      }
-
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
-    }
+    // config.admin.components.beforeDashboard.push(`mono-meta/client#BeforeDashboardClient`)
+    // config.admin.components.beforeDashboard.push(`mono-meta/rsc#BeforeDashboardServer`)
+    // config.admin.components.views?.dashboard?.
 
     return config
   }
+
+export { slugField } from './components/slug/index.js'

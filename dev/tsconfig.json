@@ -12,18 +12,10 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@payload-config": [
-        "./payload.config.ts"
-      ],
-      "mono-meta": [
-        "../src/index.ts"
-      ],
-      "mono-meta/client": [
-        "../src/exports/client.ts"
-      ],
-      "mono-meta/rsc": [
-        "../src/exports/rsc.ts"
-      ]
+      "@payload-config": ["./payload.config.ts"],
+      "mono-meta": ["../src/index.ts"],
+      "mono-meta/client": ["../src/exports/client.ts"],
+      "mono-meta/rsc": ["../src/exports/rsc.ts"]
     },
     "noEmit": true
   }
