@@ -1,4 +1,4 @@
-# Payload plugin meta
+# Payload plugin meta (⚠️work in progress⚠️)
 
 This plugin is a an opinionated alternative to the [official payload seo plugin](https://www.npmjs.com/package/@payloadcms/plugin-seo). 
 
