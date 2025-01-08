@@ -1,9 +1,18 @@
 {
   "name": "@monotwo/payload-plugin-meta",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A plugin for easy meta management in Payload",
   "license": "MIT",
   "type": "module",
+  "keywords": [
+    "payload",
+    "meta",
+    "seo",
+    "meta tags",
+    "meta description",
+    "meta image",
+    "monotwo"
+  ],
   "exports": {
     ".": {
       "import": "./src/index.ts",
