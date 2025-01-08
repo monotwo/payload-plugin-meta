@@ -1,6 +1,6 @@
 {
   "name": "@monotwo/payload-plugin-meta",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A plugin for easy meta management in Payload",
   "license": "MIT",
   "type": "module",
