@@ -22,26 +22,82 @@ export const monoMeta =
       config.collections = []
     }
 
-    if (!config.globals.find((global) => global.slug === 'meta-defaults')) {
+    if (!config.globals.find((global) => global.slug === 'meta-default')) {
       config.globals.push({
-        slug: 'meta-defaults',
+        slug: 'meta-default',
         admin: {
           group: 'Meta',
         },
-        fields: createMetaFields({
-          metaImagesCollection: pluginOptions.metaImagesCollection,
-          required: true,
-        }),
+        fields: [
+          {
+            name: 'siteName',
+            type: 'text',
+            required: true,
+          },
+          ...createMetaFields({
+            metaImagesCollection: pluginOptions.metaImagesCollection,
+            required: true,
+          }),
+        ],
         hooks: {
           afterChange: [
             () => {
-              revalidateTag('meta-defaults')
+              revalidateTag('meta-default')
             },
           ],
         },
       })
     }
 
+    // Helper function to handle tabs and sidebar fields
+    const handleTabsAndSidebarFields = (fields: Field[], metaImagesCollection: CollectionSlug) => {
+      // If already has tabs
+      if (fields.some((field) => field.type === 'tabs')) {
+        const tabsField = fields.find((field) => field.type === 'tabs')
+        if (tabsField && 'tabs' in tabsField) {
+          // Extract sidebar fields from existing tabs
+          const sidebarFields: Field[] = []
+          tabsField.tabs = tabsField.tabs.map((tab) => {
+            const tabSidebarFields = tab.fields.filter(
+              (field) => field.admin?.position === 'sidebar',
+            )
+            sidebarFields.push(...tabSidebarFields)
+
+            return {
+              ...tab,
+              fields: tab.fields.filter((field) => field.admin?.position !== 'sidebar'),
+            }
+          })
+
+          // Add Meta tab
+          tabsField.tabs.push(createMetaTab({ metaImagesCollection }))
+
+          // Return updated fields with sidebar fields moved outside
+          return [...sidebarFields, ...fields]
+        }
+      }
+
+      // Convert to tabs if no tabs exist
+      const existingFields = [...fields]
+      const sidebarFields = existingFields.filter((field) => field.admin?.position === 'sidebar')
+      const contentFields = existingFields.filter((field) => field.admin?.position !== 'sidebar')
+
+      return [
+        ...sidebarFields,
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              fields: contentFields,
+              label: 'Content',
+            },
+            createMetaTab({ metaImagesCollection }),
+          ],
+        },
+      ]
+    }
+
+    // Handle collections
     if (pluginOptions.collections) {
       for (const collectionSlug in pluginOptions.collections) {
         const collection = config.collections.find(
@@ -49,59 +105,24 @@ export const monoMeta =
         )
 
         if (collection) {
-          // If collection already has tabs, add new Meta tab
+          collection.fields = handleTabsAndSidebarFields(
+            collection.fields,
+            pluginOptions.metaImagesCollection,
+          ) as Field[]
+        }
+      }
+    }
 
-          if (collection.fields.some((field) => field.type === 'tabs')) {
-            const tabsField = collection.fields.find((field) => field.type === 'tabs')
-            if (tabsField && 'tabs' in tabsField) {
-              // Extract sidebar fields from existing tabs
-              const sidebarFields: Field[] = []
-              tabsField.tabs = tabsField.tabs.map((tab) => {
-                const tabSidebarFields = tab.fields.filter(
-                  (field) => field.admin?.position === 'sidebar',
-                )
-                sidebarFields.push(...tabSidebarFields)
+    // Handle globals
+    if (pluginOptions.globals) {
+      for (const globalSlug in pluginOptions.globals) {
+        const global = config.globals.find((global) => global.slug === globalSlug)
 
-                return {
-                  ...tab,
-                  fields: tab.fields.filter((field) => field.admin?.position !== 'sidebar'),
-                }
-              })
-
-              // Add Meta tab
-              tabsField.tabs.push(
-                createMetaTab({ metaImagesCollection: pluginOptions.metaImagesCollection }),
-              )
-
-              // Move sidebar fields outside tabs
-              collection.fields = [...sidebarFields, ...collection.fields]
-            }
-          } else {
-            // Convert existing fields to Content tab and add Meta tab
-            const existingFields = [...collection.fields]
-
-            // Separate sidebar fields from content fields
-            const sidebarFields = existingFields.filter(
-              (field) => field.admin?.position === 'sidebar',
-            )
-            const contentFields = existingFields.filter(
-              (field) => field.admin?.position !== 'sidebar',
-            )
-
-            collection.fields = [
-              ...sidebarFields,
-              {
-                type: 'tabs',
-                tabs: [
-                  {
-                    fields: contentFields,
-                    label: 'Content',
-                  },
-                  createMetaTab({ metaImagesCollection: pluginOptions.metaImagesCollection }),
-                ],
-              },
-            ]
-          }
+        if (global) {
+          global.fields = handleTabsAndSidebarFields(
+            global.fields,
+            pluginOptions.metaImagesCollection,
+          ) as Field[]
         }
       }
     }

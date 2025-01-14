@@ -6,25 +6,17 @@ This plugin is a an opinionated alternative to the [official payload seo plugin]
 
 ## What does it do exactly?
 
-### On the admin panel
-
 1. Creates default meta global, where you define the default meta information (title, description and image), that will be used globally as a fallback and/or when formatting all inner page metadata.
 2. On enabled collections/globals adds a new `Meta` tab that lets the editor override the default meta info.
 
-### On the front-end
-
-1. Provides two functions for generating meta info on the front-end:
-   
-  - `formatDefaultMeta` - Should be used in the `layout.tsx` file.
-  - `formatPageMeta` - Should be used in all inner pages that are generated from the enabled collections/globals.
-
 ## How to use
 
-### In payload
+### In your payload config
 
 In your payload config add the following:
 
 ```js
+import { monoMeta } from '@monotwo/payload-plugin-meta'
 ...
  plugins: [
     ...
@@ -69,21 +61,20 @@ export async function generateMetadata() {
 
   return formatPageMeta({
     defaultMeta,
-    showCustomMeta: page.showCustomMeta,
     pageMeta: page.pageMeta,
     // You can optionally provide the location name. This will then automatically append
     // the location name to each inner page and your editors will not need to provide custom meta.
     // The one provided below will result in `Your website - Events`, where `Your website` is set in
     // the default meta settings
     location: 'Events',
-    canonical: PAGES.EVENTS.href,
+    canonical: '/events',
   });
 }
 ``` 
 
 ## Useful stuff exported by the plugin
 
-slugField() -- A customizable and opinionated slug field.
+### slugField() -- A customizable and opinionated slug field.
 
 ```js
 /**
@@ -98,16 +89,126 @@ Example usage:
 
 ```js
 // In your collection/global config
+import { slugField } from '@monotwo/payload-plugin-meta'
+
+{
+  slug: 'about-page',
+  fields: [
     {
-      slug: 'about-page',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        slugField({ fields: ['title'], format: '{title}-is-the-title-of-the-page' }),
-      ],
+      name: 'title',
+      type: 'text',
     },
+    slugField({ fields: ['title'], format: '{title}-is-the-title-of-the-page' }),
+  ],
+},
 ``` 
+
+### An example of the formatMeta functions for the front-end
+
+```js
+import type { MetaDefault, MetaImage } from 'payload-types.js'
+
+interface PageMeta {
+  customMeta?: {
+    description?: null | string
+    image?: MetaImage | (null | string)
+    title?: null | string
+  }
+  showCustomMeta: boolean
+}
+
+interface PageMetaProps {
+  canonical: string
+  defaultMeta: MetaDefault
+  location?: string
+  pageMeta: PageMeta
+}
+
+const formatMetaImage = (defaultMeta: MetaDefault, pageMeta?: PageMeta) => {
+  const formatImage = (image: MetaImage) => ({
+    height: image.height,
+    url: image.url,
+    width: image.width,
+  })
+
+  if (pageMeta && pageMeta.showCustomMeta && pageMeta.customMeta?.image) {
+    return typeof pageMeta.customMeta.image === 'object' && pageMeta.customMeta.image
+      ? formatImage(pageMeta.customMeta.image)
+      : typeof defaultMeta.image === 'object'
+        ? formatImage(defaultMeta.image)
+        : null
+  }
+
+  return typeof defaultMeta.image === 'object' ? formatImage(defaultMeta.image) : null
+}
+
+// Should be used in the generateMetadata function of pages
+export const formatPageMeta = (props: PageMetaProps) => {
+  const { canonical, defaultMeta, location, pageMeta } = props
+
+  const defaultTitle = location ? `${location} | ${defaultMeta.title}` : defaultMeta.title
+  const defaultDescription = defaultMeta.description
+
+  return {
+    alternates: {
+      canonical,
+    },
+    description: pageMeta?.showCustomMeta
+      ? pageMeta?.customMeta?.description
+        ? pageMeta.customMeta.description
+        : defaultDescription
+      : defaultDescription,
+    openGraph: {
+      type: 'website',
+      images: [formatMetaImage(defaultMeta, pageMeta)],
+      url: canonical,
+    },
+    title:
+      pageMeta?.showCustomMeta && pageMeta.customMeta?.title
+        ? location
+          ? `${location} | ${pageMeta.customMeta.title}`
+          : pageMeta.customMeta.title
+        : defaultTitle,
+  }
+}
+
+// Should be used in the generateMetadata function of the layout.tsx file
+export const formatDefaultMeta = (defaultMeta: MetaDefault) => {
+  const defaultImage = formatMetaImage(defaultMeta)
+
+  return {
+    alternates: {
+      canonical: '/',
+    },
+    description: defaultMeta.description,
+    icons: {
+      apple: {
+        type: 'image/png',
+        url: '/_meta/apple-touch-icon.png',
+      },
+      icon: {
+        type: 'image/x-icon',
+        sizes: '32x32',
+        url: '/favicon.ico',
+      },
+      other: {
+        type: 'image/svg+xml',
+        rel: 'icon',
+        url: '/_meta/icon.svg',
+      },
+    },
+    metadataBase: new URL(`https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`),
+    openGraph: {
+      type: 'website',
+      images: [defaultImage],
+      siteName: defaultMeta.siteName,
+      url: new URL(`https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`),
+    },
+    title: defaultMeta.title,
+  }
+}
+```
+
+
 
 

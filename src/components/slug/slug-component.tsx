@@ -13,7 +13,7 @@ import {
 import React, { useCallback, useEffect } from 'react'
 
 import { formatSlug } from './formatSlug.js'
-import styles from './slug-component.module.css'
+import './slug-component.css'
 
 type SlugComponentProps = {
   fields: string[]
@@ -56,11 +56,15 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({ field, fields, for
   }, [pageExists, formFields, generateSlug])
 
   return (
-    <div className={styles.fieldType}>
-      <div className={styles.slugFieldHeader}>
+    <div className="mono-slug-field">
+      <div className="mono-slug-field mono-slug-field-header">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
         {typeof pageExists === 'string' && (
-          <Button buttonStyle="none" className={styles.generateButton} onClick={generateSlug}>
+          <Button
+            buttonStyle="none"
+            className="mono-slug-field-generate-button"
+            onClick={generateSlug}
+          >
             Generate ({format.replace(/[{}]/g, '')})
           </Button>
         )}

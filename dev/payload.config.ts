@@ -46,11 +46,15 @@ export default buildConfig({
     },
     {
       slug: 'pages',
+      admin: {
+        useAsTitle: 'title',
+      },
       fields: [
         {
           name: 'title',
           type: 'text',
         },
+        slugField({ fields: ['title'], format: '{title}' }),
       ],
     },
     {
@@ -114,7 +118,13 @@ export default buildConfig({
           name: 'title',
           type: 'text',
         },
-        slugField({ fields: ['title'], format: '{title}-lol' }),
+        {
+          name: 'settings',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
+        },
       ],
     },
   ],

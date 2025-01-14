@@ -38,11 +38,11 @@ export interface Config {
   };
   globals: {
     'about-page': AboutPage;
-    'meta-defaults': MetaDefault;
+    'meta-default': MetaDefault;
   };
   globalsSelect: {
     'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
-    'meta-defaults': MetaDefaultsSelect<false> | MetaDefaultsSelect<true>;
+    'meta-default': MetaDefaultSelect<false> | MetaDefaultSelect<true>;
   };
   locale: null;
   user: User & {
@@ -118,6 +118,7 @@ export interface MetaImage {
 export interface Page {
   id: string;
   title?: string | null;
+  slug: string;
   pageMeta: {
     /**
      * You can override the default meta information for this page. If you don't, the default meta information will be used.
@@ -291,6 +292,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
   pageMeta?:
     | T
     | {
@@ -416,17 +418,29 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface AboutPage {
   id: string;
+  settings?: string | null;
   title?: string | null;
-  slug: string;
+  pageMeta: {
+    /**
+     * You can override the default meta information for this page. If you don't, the default meta information will be used.
+     */
+    showCustomMeta: boolean;
+    customMeta?: {
+      title?: string | null;
+      description?: string | null;
+      image?: (string | null) | MetaImage;
+    };
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "meta-defaults".
+ * via the `definition` "meta-default".
  */
 export interface MetaDefault {
   id: string;
+  siteName: string;
   title: string;
   description: string;
   image: string | MetaImage;
@@ -438,17 +452,30 @@ export interface MetaDefault {
  * via the `definition` "about-page_select".
  */
 export interface AboutPageSelect<T extends boolean = true> {
+  settings?: T;
   title?: T;
-  slug?: T;
+  pageMeta?:
+    | T
+    | {
+        showCustomMeta?: T;
+        customMeta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "meta-defaults_select".
+ * via the `definition` "meta-default_select".
  */
-export interface MetaDefaultsSelect<T extends boolean = true> {
+export interface MetaDefaultSelect<T extends boolean = true> {
+  siteName?: T;
   title?: T;
   description?: T;
   image?: T;
